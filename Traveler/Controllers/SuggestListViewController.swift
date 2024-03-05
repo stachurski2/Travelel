@@ -89,9 +89,10 @@ class SuggestListViewController: UIViewController {
                 case .fromCoreData:
                     let points = coreData.fetchData()
                     switch indexPath.row {
-                    case 0: let cellHead =  tableView.dequeueReusableCell(withIdentifier: "SavePointsHead") as! SuggestHeadCell
-                            cellHead.controller = self
-                            return cellHead
+                    case 0:
+                        
+                        let cellHead = UITableViewCell()
+                        return cellHead
                     default:
                             if indexPath.row-1 > points.count-1 {
                                 let cellHead = UITableViewCell()

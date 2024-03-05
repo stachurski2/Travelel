@@ -66,7 +66,8 @@ open class TokenQueue {
      * @return true if the next characters match.
      */
     open func matches(_ seq: String) -> Bool {
-        return queue.regionMatches(true, pos, seq, 0, seq.count)
+        return queue.regionMatches(ignoreCase: true, selfOffset: pos,
+                                   other: seq, otherOffset: 0, targetLength: seq.count)
     }
 
     /**
@@ -314,7 +315,7 @@ open class TokenQueue {
      * @param in backslash escaped string
      * @return unescaped string
      */
-    open static func unescape(_ input: String) -> String {
+    public static func unescape(_ input: String) -> String {
         let out = StringBuilder()
         var last = empty
         for c in input {

@@ -53,7 +53,7 @@ class InfoDetailCell: UITableViewCell {
             case "TRAIN": typeImage.image = #imageLiteral(resourceName: "train.gif")
             case "URBAN_BUS": typeImage.image = #imageLiteral(resourceName: "bus.gif")
             case "URBAN_SUBWAY": typeImage.image = #imageLiteral(resourceName: "train.gif")
-            case "AUT": typeImage.image = #imageLiteral(resourceName: "coach.gif")
+            case "AUT": typeImage.image = #imageLiteral(resourceName: "bus.gif")
             default: break
          }
         departure.text = "\(subConnection.startTime) \(subConnection.startDate)"

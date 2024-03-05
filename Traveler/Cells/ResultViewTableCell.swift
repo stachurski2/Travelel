@@ -107,11 +107,11 @@ class ResultViewTableCell: UITableViewCell {
             
             if number <= 6 {
                 switch type {
-                    case "BUS": image = #imageLiteral(resourceName: "coach.gif")
+                    case "BUS": image = #imageLiteral(resourceName: "bus.gif")
                     case "TRAIN": image = #imageLiteral(resourceName: "train.gif")
                     case "URBAN_BUS": image = #imageLiteral(resourceName: "bus.gif")
                     case "URBAN_SUBWAY": image = #imageLiteral(resourceName: "train.gif")
-                    case "AUT": image = #imageLiteral(resourceName: "coach.gif")
+                    case "AUT": image = #imageLiteral(resourceName: "bus.gif")
                     default:
                         print ("Another type:x \(type)")
                 }

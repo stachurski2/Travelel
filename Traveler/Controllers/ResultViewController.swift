@@ -8,10 +8,11 @@
 
 import Foundation
 import UIKit
+import WebKit
 
 class ResultViewController: UIViewController {
     var content:String?
-    let webView = UIWebView()
+    let webView = WKWebView()
     var conections:Connections = Connections()
     
     let aSubView:UIView = UIView(frame: CGRect(x: 0, y: 0, width: 300, height: 100))

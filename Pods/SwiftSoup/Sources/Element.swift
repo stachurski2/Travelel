@@ -10,12 +10,12 @@ import Foundation
 
 open class Element: Node {
 	var _tag: Tag
-    
+
     private static let classString = "class"
     private static let emptyString = ""
     private static let idString = "id"
     private static let rootString = "#root"
-    
+
     //private static let classSplit : Pattern = Pattern("\\s+")
 	private static let classSplit = "\\s+"
 
@@ -138,8 +138,8 @@ open class Element: Node {
      * Get this element's HTML5 custom data attributes. Each attribute in the element that has a key
      * starting with "data-" is included the dataset.
      * <p>
-     * E.g., the element {@code <div data-package="jsoup" data-language="Java" class="group">...} has the dataset
-     * {@code package=jsoup, language=java}.
+     * E.g., the element {@code <div data-package="SwiftSoup" data-language="Java" class="group">...} has the dataset
+     * {@code package=SwiftSoup, language=java}.
      * <p>
      * This map is a filtered view of the element's attribute map. Changes to one map (add, remove, update) are reflected
      * in the other map.
@@ -254,7 +254,7 @@ open class Element: Node {
     }
 
     /**
-     * Find elements that match the {@link Selector} CSS query, with this element as the starting context. Matched elements
+     * Find elements that match the {@link CssSelector} CSS query, with this element as the starting context. Matched elements
      * may include this element, or any of its children.
      * <p>
      * This method is generally more powerful to use than the DOM-type {@code getElementBy*} methods, because
@@ -265,42 +265,38 @@ open class Element: Node {
      * <li>{@code el.select("a[href*=example.com]")} - finds links pointing to example.com (loosely)
      * </ul>
      * <p>
-     * See the query syntax documentation in {@link org.jsoup.select.Selector}.
+     * See the query syntax documentation in {@link CssSelector}.
      * </p>
      *
-     * @param cssQuery a {@link Selector} CSS-like query
+     * @param cssQuery a {@link CssSelector} CSS-like query
      * @return elements that match the query (empty if none match)
-     * @see org.jsoup.select.Selector
-     * @throws Selector.SelectorParseException (unchecked) on an invalid CSS query.
+     * @see CssSelector
+     * @throws CssSelector.SelectorParseException (unchecked) on an invalid CSS query.
      */
     public func select(_ cssQuery: String)throws->Elements {
-        return try Selector.select(cssQuery, self)
+        return try CssSelector.select(cssQuery, self)
     }
-    
+
     /**
-     * Check if this element matches the given {@link Selector} CSS query.
-     * @param cssQuery a {@link Selector} CSS query
+     * Check if this element matches the given {@link CssSelector} CSS query.
+     * @param cssQuery a {@link CssSelector} CSS query
      * @return if this element matches the query
      */
     public func iS(_ cssQuery: String)throws->Bool {
-        return try iS(QueryParser.parse(cssQuery));
+        return try iS(QueryParser.parse(cssQuery))
     }
-    
+
     /**
-     * Check if this element matches the given {@link Selector} CSS query.
-     * @param cssQuery a {@link Selector} CSS query
+     * Check if this element matches the given {@link CssSelector} CSS query.
+     * @param cssQuery a {@link CssSelector} CSS query
      * @return if this element matches the query
      */
     public func iS(_ evaluator: Evaluator)throws->Bool {
         guard let od = self.ownerDocument() else {
-            return false;
+            return false
         }
-        return try evaluator.matches(od, self);
+        return try evaluator.matches(od, self)
     }
-
-    
-    
-    
 
     /**
      * Add a node child node to this element.
@@ -508,30 +504,32 @@ open class Element: Node {
      * @return the CSS Path that can be used to retrieve the element in a selector.
      */
     public func cssSelector()throws->String {
-        if (id().count > 0) {
-            return "#" + id()
+        let elementId = id()
+        if (elementId.count > 0) {
+            return "#" + elementId
         }
 
         // Translate HTML namespace ns:tag to CSS namespace syntax ns|tag
         let tagName: String = self.tagName().replacingOccurrences(of: ":", with: "|")
-        let selector: StringBuilder = StringBuilder(string: tagName)
+        var selector: String = tagName
         let cl = try classNames()
         let classes: String = cl.joined(separator: ".")
         if (classes.count > 0) {
-            selector.append(".").append(classes)
+            selector.append(".")
+            selector.append(classes)
         }
 
         if (parent() == nil || ((parent() as? Document) != nil)) // don't add Document to selector, as will always have a html node
         {
-            return selector.toString()
+            return selector
         }
 
-        selector.insert(0, " > ")
-        if (try parent()!.select(selector.toString()).array().count > 1) {
+        selector.insert(contentsOf: " > ", at: selector.startIndex)
+        if (try parent()!.select(selector).array().count > 1) {
             selector.append(":nth-child(\(try elementSiblingIndex() + 1))")
         }
 
-        return try parent()!.cssSelector() + (selector.toString())
+        return try parent()!.cssSelector() + (selector)
     }
 
     /**
@@ -920,16 +918,22 @@ open class Element: Node {
      */
     class textNodeVisitor: NodeVisitor {
         let accum: StringBuilder
-        init(_ accum: StringBuilder) {
+        let trimAndNormaliseWhitespace: Bool
+        init(_ accum: StringBuilder, trimAndNormaliseWhitespace: Bool) {
             self.accum = accum
+            self.trimAndNormaliseWhitespace = trimAndNormaliseWhitespace
         }
         public func head(_ node: Node, _ depth: Int) {
             if let textNode = (node as? TextNode) {
-                Element.appendNormalisedText(accum, textNode)
+                if trimAndNormaliseWhitespace {
+                    Element.appendNormalisedText(accum, textNode)
+                } else {
+                    accum.append(textNode.getWholeText())
+                }
             } else if let element = (node as? Element) {
-                if (accum.length > 0 &&
+                if !accum.isEmpty &&
                     (element.isBlock() || element._tag.getName() == "br") &&
-                    !TextNode.lastCharIsWhitespace(accum)) {
+                    !TextNode.lastCharIsWhitespace(accum) {
                     accum.append(" ")
                 }
             }
@@ -938,10 +942,14 @@ open class Element: Node {
         public func tail(_ node: Node, _ depth: Int) {
         }
     }
-    public func text()throws->String {
+    public func text(trimAndNormaliseWhitespace: Bool = true)throws->String {
         let accum: StringBuilder = StringBuilder()
-        try NodeTraversor(textNodeVisitor(accum)).traverse(self)
-        return accum.toString().trim()
+        try NodeTraversor(textNodeVisitor(accum, trimAndNormaliseWhitespace: trimAndNormaliseWhitespace)).traverse(self)
+        let text = accum.toString()
+        if trimAndNormaliseWhitespace {
+            return text.trim()
+        }
+        return text
     }
 
     /**
@@ -1063,9 +1071,9 @@ open class Element: Node {
      * @return set of classnames, empty if no class attribute
      */
 	public func classNames()throws->OrderedSet<String> {
-		let fitted = try className().replaceAll(of: Element.classSplit, with: " ", options:.caseInsensitive)
+		let fitted = try className().replaceAll(of: Element.classSplit, with: " ", options: .caseInsensitive)
 		let names: [String] = fitted.components(separatedBy: " ")
-		let classNames: OrderedSet<String> = OrderedSet(sequence:names)
+		let classNames: OrderedSet<String> = OrderedSet(sequence: names)
 		classNames.remove(Element.emptyString) // if classNames() was empty, would include an empty class
 		return classNames
 	}
@@ -1109,7 +1117,9 @@ open class Element: Node {
             if (classAttr.charAt(i).isWhitespace) {
                 if (inClass) {
                     // white space ends a class name, compare it with the requested one, ignore case
-                    if (i - start == wantLen && classAttr.regionMatches(true, start, className, 0, wantLen)) {
+                    if (i - start == wantLen && classAttr.regionMatches(ignoreCase: true, selfOffset: start,
+                                                                        other: className, otherOffset: 0,
+                                                                        targetLength: wantLen)) {
                         return true
                     }
                     inClass = false
@@ -1125,7 +1135,8 @@ open class Element: Node {
 
         // check the last entry
         if (inClass && len - start == wantLen) {
-            return classAttr.regionMatches(true, start, className, 0, wantLen)
+            return classAttr.regionMatches(ignoreCase: true, selfOffset: start,
+                                           other: className, otherOffset: 0, targetLength: wantLen)
         }
 
         return false
@@ -1203,7 +1214,7 @@ open class Element: Node {
 
     override func outerHtmlHead(_ accum: StringBuilder, _ depth: Int, _ out: OutputSettings)throws {
         if (out.prettyPrint() && (_tag.formatAsBlock() || (parent() != nil && parent()!.tag().formatAsBlock()) || out.outline())) {
-            if (accum.length > 0) {
+            if !accum.isEmpty {
                 indent(accum, depth, out)
             }
         }
@@ -1215,9 +1226,9 @@ open class Element: Node {
         // selfclosing includes unknown tags, isEmpty defines tags that are always empty
         if (childNodes.isEmpty && _tag.isSelfClosing()) {
             if (out.syntax() == OutputSettings.Syntax.html && _tag.isEmpty()) {
-                accum.append(">")
+                accum.append(" />") // <img /> for "always empty" tags. selfclosing is ignored but retained for xml/xhtml compatibility
             } else {
-                accum.append(" />") // <img> in html, <img /> in xml
+                accum.append(" />") // <img /> in xml
             }
         } else {
             accum.append(">")
@@ -1290,8 +1301,16 @@ open class Element: Node {
 		return super.copy(clone: clone, parent: parent)
 	}
 
-	override public var hashValue: Int {
-		return super.hashValue ^ _tag.hashValue
-	}
-
+    public static func ==(lhs: Element, rhs: Element) -> Bool {
+    	guard lhs as Node == rhs as Node else {
+            return false
+        }
+        
+        return lhs._tag == rhs._tag
+    }
+	
+    override public func hash(into hasher: inout Hasher) {
+        super.hash(into: &hasher)
+        hasher.combine(_tag)
+    }
 }

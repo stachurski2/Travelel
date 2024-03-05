@@ -23,15 +23,15 @@ public struct Pattern {
         return Pattern(s)
     }
 
-    func validate()throws {
-         _ = try NSRegularExpression(pattern: self.pattern, options:[])
+    public func validate()throws {
+         _ = try NSRegularExpression(pattern: self.pattern, options: [])
     }
 
-    func matcher(in text: String) -> Matcher {
+    public func matcher(in text: String) -> Matcher {
         do {
-            let regex = try NSRegularExpression(pattern: self.pattern, options:[])
+            let regex = try NSRegularExpression(pattern: self.pattern, options: [])
             let nsString = NSString(string: text)
-            let results = regex.matches(in: text, options:[], range: NSRange(location: 0, length: nsString.length))
+            let results = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsString.length))
 
             return Matcher(results, text)
         } catch let error {
@@ -73,7 +73,7 @@ public class  Matcher {
         #else
             let c = b.range(at: i)
         #endif
-        
+
         if(c.location == NSNotFound) {return nil}
         let result = string.substring(c.location, c.length)
         return result
