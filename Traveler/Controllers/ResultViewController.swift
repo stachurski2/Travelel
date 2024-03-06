@@ -149,7 +149,7 @@ extension ResultViewController:loading {
         label.translatesAutoresizingMaskIntoConstraints = false
         indicator.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .center
-        indicator.activityIndicatorViewStyle = .gray
+        indicator.style = UIActivityIndicatorView.Style.medium
         aSubView.backgroundColor = UIColor.yellow
         label.backgroundColor = UIColor.yellow
         indicator.startAnimating()

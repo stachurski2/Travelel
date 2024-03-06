@@ -76,7 +76,7 @@ extension Task {
         return "\(day).\(month).\(calendar.component(.year, from: date))"
     }
     
-    open func showTime()->String {
+    public func showTime()->String {
         if calendar.component(.minute, from: date)<10 {
             return "\(calendar.component(.hour, from: date)):0\(calendar.component(.minute, from: date))"
         }
@@ -103,29 +103,29 @@ extension Task {
     
     func changeDirectConnection(value:Bool)->Void {self.directConnection = value}
     
-    open func getStartPoint()->String{
+    public func getStartPoint()->String{
         guard let point = self.startPoint?.getID() else {return "c|0"}
         return point
     }
-    open func getEndPoint()->String{
+    public func getEndPoint()->String{
         guard let point = self.endPoint?.getID() else {return "c|0"}
         return point
     }
     
-    open func getTabToken()->String{
+    public func getTabToken()->String{
         guard let tabToken = self.token else {return ""}
         return tabToken
     }
     
-    open func getStartPointName()->String{
+    public func getStartPointName()->String{
         guard let tabToken = self.startPoint?.getName() else {return ""}
         return tabToken
     }
-    open func getEndPointName()->String{
+    public func getEndPointName()->String{
         guard let point = self.endPoint?.getName() else {return ""}
         return point
     }
-    open func directConnectionPrefer()->Bool {
+    public func directConnectionPrefer()->Bool {
         return directConnection
     }
     

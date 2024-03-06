@@ -14,18 +14,20 @@ import CoreData
 class PointCoreData:CoreData {
 
     func fetchData()->[Point] {
-        var points:[Point] = []
+        var points = [Point]()
         if state == .succeded {
             let start = records.count - 1
           
             for index in stride(from: start, to: -1, by: -1) {
                     let record = records[index]
-                    guard let name =  record.value(forKey: "name") as! String! else {return points}
-                    guard let description =  record.value(forKey: "descripton") as! String! else {return points}
-                    guard let id = record.value(forKey:"id") as! String! else {return points}
-                    guard let lon = record.value(forKey:"lon") as! String! else {return points}
-                    guard let lat = record.value(forKey:"lat") as! String! else {return points}
-                    guard let type = record.value(forKey:"type") as! String! else {return points}
+                    guard let name =  record.value(forKey: "name") as? String,
+                          let description =  record.value(forKey: "descripton") as? String,
+                          let id = record.value(forKey:"id") as? String,
+                          let lon = record.value(forKey:"lon") as? String,
+                          let lat = record.value(forKey:"lat") as? String,
+                          let type = record.value(forKey:"type") as? String else {
+                        return points
+                    }
                     let point = Point(name: name, description: description, id: id, lon: lon, la: lat, type: type)
                     points.append(point)
                 }

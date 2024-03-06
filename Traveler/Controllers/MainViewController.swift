@@ -31,7 +31,7 @@ enum EditingPointType {
 }
 
 
-class MainViewController: UIViewController, UITextFieldDelegate{
+class MainViewController: UIViewController, UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
@@ -76,8 +76,6 @@ class MainViewController: UIViewController, UITextFieldDelegate{
         self.navigationController?.setNavigationBarHidden(true, animated: true)
         tableview.dataSource = self
         tableview.delegate = self
-//        tableview.allowsSelectionDuringEditing = true
- //       tableview.isEditing = true
     }
     
 
@@ -173,12 +171,6 @@ class MainViewController: UIViewController, UITextFieldDelegate{
         }
         
     }
-    
-   
-    
-    
-
-    
 }
 
 
@@ -190,7 +182,7 @@ extension MainViewController:loading {
         label.translatesAutoresizingMaskIntoConstraints = false
         indicator.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .center
-        indicator.activityIndicatorViewStyle = .gray
+        indicator.style = .medium
         aSubView.backgroundColor = UIColor.yellow
         label.backgroundColor = UIColor.yellow
         indicator.startAnimating()
